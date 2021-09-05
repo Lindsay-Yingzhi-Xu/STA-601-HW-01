@@ -1,0 +1,118 @@
+\documentclass{article}
+\usepackage{url,hyperref}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,array,comment,eucal}
+\usepackage{fullpage}
+\include{macros}
+
+%\input{macros}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+
+\title{STA601-F21 HW 1}
+\author{Lindsay Yingzhi Xu}
+<<echo=FALSE>>=
+date = format(Sys.time(), '%d %B, %Y')
+@
+
+\date{\today}
+
+\maketitle
+
+<<r setup, include=FALSE, echo=FALSE>>=
+# Import packages
+library(tidyverse)
+
+# ggplot options
+ggplot2::theme_set(ggplot2::theme_bw())
+# knitr options
+knitr::opts_chunk$set(fig.align = 'center')
+knitr::opts_chunk$set(echo = TRUE)
+
+# Set the seed 
+set.seed(42)
+@
+
+% Comments are preceded by '%'  this is an un-numbered section - delete the * to use automatic numbering
+
+
+We are in the Poisson-Binomial setting for this homework set. Let $Y_i \simiid \textsf{Poisson}(\theta)$ with $i = 1, \dots, n$ denote the number of COVID
+hospitalizations in county $i$ on a given day, and $n$ is the total number of observations in the dataset. Assume that the rate $\theta$ is constant across counties.
+
+\section*{Part 1}
+
+
+\begin{enumerate}
+\item 
+Define a conjugate prior for $\theta$. Use information available on the web to choose an informative prior and justify it. 
+
+A gamma distribution $\theta\sim{Gamma}(\alpha,\beta)$ is a conjugate prior to the ${Poisson}(\theta)$\\ 
+In specific, I think a gamma distribution with parameters $\alpha$ =  ,$\beta$ = would be a informative prior.\\
+Justify:\\
+The $E(\theta)=\frac{\alpha}{\beta}$, while the $Var(\theta)=\frac{\alpha}{\beta^2}$\\
+According to Durham County Coronavirus Data Hub, in the past two weeks, the average number of daily COVID hospitalization in Durham county is 32, the variance is about 18.6. Namely, $E(\theta)=\frac{\alpha}{\beta}$=32,$Var(\theta)=\frac{\alpha}{\beta^2}$=17.\\  
+Therefore, I define the conjugate prior as $\theta\sim{Gamma}(64,2)$
+
+\item 
+Find the Jeffrey's prior for $\theta$.  Is it a proper distribution? Is it a conjugate prior or limit of a conjugate prior?\\
+(1). The Jeffrey's prior for $\theta$ is $\theta^{-\frac{1}{2}}$\\
+(2). $\int_0^\infty\theta^{-\frac{1}{2}}d\theta=$
+$\left.2\theta^{\frac{1}{2}}\right|_0^\infty$ is infinite\\
+Therefore, it is not a proper distribution.\\ 
+(3). $\theta^{-\frac{1}{2}}\sim\lim_{\alpha=\frac{1}{2},\beta\to 0}{Gamma}(\alpha,\beta)$\\
+Therefore, it is a limit of a conjugate prior. 
+
+\item
+Calculate the posterior analytically.\\
+The likelihood:
+$\mathcal{L}(\theta|x)=\prod_{i=1}^n\frac{e^{-\theta}\theta^{x_i}}{x_i!}$\\
+The prior:
+$p(\theta)=\frac{\beta^\alpha}{\Gamma(\alpha)}\theta^{\alpha-1}e^{-\beta\theta}, \theta>0$\\
+The posterior:
+$\pi(\theta|x)\varpropto p(\theta)\mathcal{L}(\theta|x)$\\
+$\pi(\theta|x)\varpropto \theta^{\sum_{i=1}^{n}{x_i}+\alpha-1}e^{-(n+\beta)\theta},\theta>0$\\
+Therefore, the posterior: $\pi(\theta|x)\sim{Gamma}(\sum_{i=1}^{n}{x_i}+\alpha, n+\beta)$
+
+\item
+Discuss prior posterior updating. How does the prior and posterior mean relate to each other?
+
+
+\end{enumerate}
+
+\section*{Part 2}
+In {\tt R}, do the following.
+
+\begin{enumerate}
+  \item Fix a value for $\theta$ of your choosing.
+  \item Simulate one random dataset with $n = 100$ (command  {\tt rpois}).
+  \item Set an informative prior of your choosing (ie one that is not flat or Jeffreys). Plot the prior, posterior and the
+MLE as a verical line on the same graph (hint: $\theta_{\textrm MLE} = \bar{y}$).
+  \item Set a non-informative prior for $\theta$. Plot the prior, posterior and the MLE as a vertical line on the same graph.
+  What is the relationship between the prior, the MLE and the posterior? Does the result change for $n = 10$? and for $n = 10000$?
+  
+\it{Suggestion}: you should construct a function that does the plotting, so that you do not have to rewrite the code multiple times. The arguments of the function should be the simulated vector of data and the prior parameters values.
+\end{enumerate}
+
+\section*{Part 3}
+Load the data on COVID-19 in the repository and read it in
+
+<<data>>=
+covid = read.csv("covid-hospitalizations.csv", header=TRUE)
+@
+
+
+\begin{enumerate}
+  \item Use the prior distribution you chose for Part 1 to compute the posterior and simulate from it.  Plot the prior and posterior, and indicate the posterior mean and prior mean using a vertical line. How does the posterior look under a non-informative prior?  (Create the same plot)
+
+\item There are several assumptions that are being used here: the Poisson rate is the same across counties and that the data are iid (independent and identically distributed).  Take a closer look at the data file. Is there any indication that these two assumptions might be violated?  Discuss and provide any visualizations to help back up your arguments if possible. 
+
+
+\end{enumerate}
+
+
+
+\end{document}
+
+
